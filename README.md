@@ -219,8 +219,7 @@ If the record does not pass the check, do not add it to the table.
 
 ### Part 3. Getting data
 
-Create a *part3.sql* script, in which you should include the following procedures and functions
-(consider as procedures all tasks that do not specify that they are functions).
+Create a *part3.sql* script, in which you should include the following procedures and functions.
 
 ##### 1) Write a function that returns the TransferredPoints table in a more human-readable form
 Peer's nickname 1, Peer's nickname 2, number of transferred peer points. \
