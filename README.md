@@ -397,4 +397,4 @@ Add the creation and filling of this database, as well as the written procedures
 
 ##### 4) Create a stored procedure with an input parameter that outputs names and descriptions of object types (only stored procedures and scalar functions) that have a string specified by the procedure parameter.
 
-💡 [Tap here](https://forms.yandex.ru/cloud/64182088eb61462532cee6b5/) **to leave your feedback on the project**. Pedago Team really tries to make your educational experience better.
+💡 [Tap here](https://forms.yandex.ru/cloud/64182088eb61462532cee6b5/) **to leave your feedback on the project**. Product Team really tries to make your educational experience better.
