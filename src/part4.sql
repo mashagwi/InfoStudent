@@ -8,7 +8,8 @@ DECLARE
     drop_query TEXT;
 BEGIN
     -- Получаем список таблиц в текущей базе данных
-    FOR cur_table_name IN (SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name LIKE prefix_to_drop || '%') 
+    FOR cur_table_name IN (SELECT table_name FROM information_schema.tables 
+                            WHERE table_schema = 'public' AND table_name LIKE prefix_to_drop || '%') 
     LOOP
         -- Формируем запрос для удаления таблицы
         drop_query := 'DROP TABLE IF EXISTS ' || cur_table_name || ' CASCADE';
@@ -40,30 +41,38 @@ $$
 DECLARE
     function_name   TEXT;
     function_params TEXT;
-    func_record     RECORD;
+    cur             refcursor;
 BEGIN
     num_functions := 0;
     function_info := '';
 
-    FOR func_record IN
-        SELECT p.proname AS function_name, pg_get_function_identity_arguments(p.oid) AS function_params
-        FROM pg_proc p
-                 JOIN pg_namespace n ON p.pronamespace = n.oid
-        WHERE n.nspname = 'public'
-          AND p.proargtypes IS NOT NULL
-        LOOP
-            function_name := func_record.function_name;
-            function_params := func_record.function_params;
-            
-            IF function_params != '' THEN
-                num_functions := num_functions + 1;
-                function_info := function_info || function_name || '(' || function_params || '), ';
-            END IF;
-        END LOOP;
+    OPEN cur FOR
+    SELECT p.proname, pg_get_function_identity_arguments(p.oid)
+    FROM pg_proc p
+           JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public'
+      AND p.proargtypes IS NOT NULL
+      AND p.prorettype <> 0
+      AND p.prokind = 'f' -- только скалярные функции
+      AND NOT EXISTS (
+        SELECT 1
+        FROM pg_aggregate a
+        WHERE a.aggfnoid = p.oid
+      )
+    ORDER BY p.proname
+    LIMIT 1;
 
-    IF LENGTH(function_info) > 2 THEN
-        function_info := SUBSTRING(function_info, 1, LENGTH(function_info) - 2);
-    END IF;
+    LOOP
+        FETCH cur INTO function_name, function_params;
+
+        EXIT WHEN NOT FOUND;
+
+        num_functions := num_functions + 1;
+        function_info := function_name || '(' || function_params || ')';
+        RAISE NOTICE 'Found % scalar functions: %', num_functions, function_info;
+    END LOOP;
+
+    CLOSE cur;
 END;
 $$
 LANGUAGE plpgsql;
@@ -75,14 +84,33 @@ DECLARE
     function_info TEXT;
 BEGIN
     CALL get_scalar_functions_info(num_functions, function_info);
-    RAISE NOTICE 'Found % scalar functions: %', num_functions, function_info;
 END
 $$;
 
---Для теста. В этом и предыдущем заданиях уже созданы функции.
--- SELECT proname, pg_get_function_identity_arguments(oid) AS arguments
--- FROM pg_proc
--- WHERE pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public');
+--Для теста. В этом и предыдущем заданиях уже созданы функции, а также создадим скалярную с параметрами и скалярную без параметров.
+
+-- CREATE OR REPLACE FUNCTION add_numbers(a INT, b INT) RETURNS INT AS
+-- $$
+-- BEGIN
+--     RETURN a + b;
+-- END;
+-- $$
+-- LANGUAGE plpgsql;
+
+-- SELECT add_numbers(3, 5) AS result;
+
+-- CREATE OR REPLACE FUNCTION generate_random_number() RETURNS INT AS
+-- $$
+-- DECLARE
+--     random_number INT;
+-- BEGIN
+--     random_number := floor(random() * 100) + 1; -- Генерация случайного числа от 1 до 100
+--     RETURN random_number;
+-- END;
+-- $$
+-- LANGUAGE plpgsql;
+
+-- SELECT generate_random_number() AS random_number;
 
 
 --3 Создать хранимую процедуру с выходным параметром, которая уничтожает все SQL DML триггеры в текущей базе данных.
