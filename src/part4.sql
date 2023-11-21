@@ -1,5 +1,13 @@
--- 1) Создать хранимую процедуру, которая, 
---не уничтожая базу данных, уничтожает все те таблицы текущей базы данных, имена которых начинаются с фразы 'TableName'.
+-- Создание базы данных
+CREATE DATABASE database_test;
+
+-- Создание таблиц
+CREATE TABLE TableName1 (id serial PRIMARY KEY, name VARCHAR(255));
+CREATE TABLE TableName2 (id serial PRIMARY KEY, description VARCHAR(255));
+CREATE TABLE OtherTable (id serial PRIMARY KEY, description VARCHAR(255));
+
+-- 1) Создать хранимую процедуру, которая, не уничтожая базу данных,
+-- уничтожает все те таблицы текущей базы данных, имена которых начинаются с фразы 'TableName'.
 
 CREATE OR REPLACE PROCEDURE drop_tables_with_prefix(prefix_to_drop TEXT)
 LANGUAGE plpgsql AS $$
@@ -18,24 +26,24 @@ BEGIN
 END;
 $$;
 
+--Тестовый вызов процедуры
 CALL drop_tables_with_prefix('tablename');
 
---DROP PROCEDURE IF EXISTS drop_tables_with_prefix CASCADE;
+--Выводим список таблиц в БД
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public';
 
---Для теста
+DROP PROCEDURE IF EXISTS drop_tables_with_prefix CASCADE;
 
--- CREATE TABLE TableName1 (id serial PRIMARY KEY, name VARCHAR(255));
--- CREATE TABLE TableName2 (id serial PRIMARY KEY, description VARCHAR(255));
--- CREATE TABLE OtherTable (id serial PRIMARY KEY, description VARCHAR(255));
-
--- 2) Создать хранимую процедуру с выходным параметром, которая выводит список имен и параметров всех скалярных  
---SQL функций пользователя в текущей базе данных. Имена функций без параметров не выводить. 
+-- 2) Создать хранимую процедуру с выходным параметром, которая выводит список имен и параметров   
+--всех скалярных SQL функций пользователя в текущей базе данных. Имена функций без параметров не выводить. 
 --Имена и список параметров должны выводиться в одну строку. 
 --Выходной параметр возвращает количество найденных функций.
 
 CREATE OR REPLACE PROCEDURE get_scalar_functions_info(
     OUT num_functions INT,
-    OUT function_info TEXT
+    OUT function_info TEXT[]
 ) AS
 $$
 DECLARE
@@ -44,23 +52,23 @@ DECLARE
     cur             refcursor;
 BEGIN
     num_functions := 0;
-    function_info := '';
+    function_info := ARRAY[]::TEXT[];
 
     OPEN cur FOR
     SELECT p.proname, pg_get_function_identity_arguments(p.oid)
     FROM pg_proc p
            JOIN pg_namespace n ON p.pronamespace = n.oid
     WHERE n.nspname = 'public'
-      AND p.proargtypes IS NOT NULL
-      AND p.prorettype <> 0
-      AND p.prokind = 'f' -- только скалярные функции
       AND NOT EXISTS (
         SELECT 1
         FROM pg_aggregate a
         WHERE a.aggfnoid = p.oid
       )
-    ORDER BY p.proname
-    LIMIT 1;
+      AND pg_get_function_result(p.oid)::regtype <> 'trigger'::regtype -- исключаем триггерные функции
+      AND pg_get_function_result(p.oid)::regtype <> 'internal'::regtype -- исключаем внутренние функции
+      AND p.proretset = 'f' -- только скалярные функции (не возвращающие набор)
+      AND p.pronargs > 0 -- с параметрами
+    ORDER BY p.proname;
 
     LOOP
         FETCH cur INTO function_name, function_params;
@@ -68,8 +76,7 @@ BEGIN
         EXIT WHEN NOT FOUND;
 
         num_functions := num_functions + 1;
-        function_info := function_name || '(' || function_params || ')';
-        RAISE NOTICE 'Found % scalar functions: %', num_functions, function_info;
+        function_info := function_info || ARRAY[function_name || '(' || function_params || ')'];
     END LOOP;
 
     CLOSE cur;
@@ -77,6 +84,36 @@ END;
 $$
 LANGUAGE plpgsql;
 
+--Для теста создадим скалярные функции: с параметрами и без параметров.
+
+CREATE OR REPLACE FUNCTION add_numbers(a INT, b INT) RETURNS INT AS
+$$
+BEGIN
+    RETURN a + b;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION dif_numbers(a INT, b INT) RETURNS INT AS
+$$
+BEGIN
+    RETURN a - b;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION generate_random_number() RETURNS INT AS
+$$
+DECLARE
+    random_number INT;
+BEGIN
+    random_number := floor(random() * 100) + 1; 
+    RETURN random_number;
+END;
+$$
+LANGUAGE plpgsql;
+
+-- Тестовая транзакция 
 DO
 $$
 DECLARE
@@ -87,30 +124,10 @@ BEGIN
 END
 $$;
 
---Для теста. В этом и предыдущем заданиях уже созданы функции, а также создадим скалярную с параметрами и скалярную без параметров.
-
--- CREATE OR REPLACE FUNCTION add_numbers(a INT, b INT) RETURNS INT AS
--- $$
--- BEGIN
---     RETURN a + b;
--- END;
--- $$
--- LANGUAGE plpgsql;
-
--- SELECT add_numbers(3, 5) AS result;
-
--- CREATE OR REPLACE FUNCTION generate_random_number() RETURNS INT AS
--- $$
--- DECLARE
---     random_number INT;
--- BEGIN
---     random_number := floor(random() * 100) + 1; -- Генерация случайного числа от 1 до 100
---     RETURN random_number;
--- END;
--- $$
--- LANGUAGE plpgsql;
-
--- SELECT generate_random_number() AS random_number;
+-- Выводим список всех функций и процедур БД
+SELECT routine_name, routine_type
+FROM information_schema.routines
+WHERE routine_schema = 'public';
 
 
 --3 Создать хранимую процедуру с выходным параметром, которая уничтожает все SQL DML триггеры в текущей базе данных.
@@ -135,79 +152,87 @@ END;
 $$
 LANGUAGE plpgsql;
 
+
+-- Для теста 
+-- Создание таблиц
+CREATE TABLE public.test_table1 (
+    id serial PRIMARY KEY,
+    value INT
+);
+
+CREATE TABLE public.test_table2 (
+    id serial PRIMARY KEY,
+    value INT
+);
+
+-- Создание триггеров 
+CREATE OR REPLACE FUNCTION trg_before_insert_test_table1()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE NOTICE 'Trigger trg_before_insert_test_table1 fired';
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_before_insert_test_table1
+BEFORE INSERT ON public.test_table1
+FOR EACH ROW EXECUTE FUNCTION trg_before_insert_test_table1();
+
+CREATE OR REPLACE FUNCTION trg_before_update_test_table2()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE NOTICE 'Trigger trg_before_update_test_table2 fired';
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_before_update_test_table2
+BEFORE UPDATE ON public.test_table2
+FOR EACH ROW EXECUTE FUNCTION trg_before_update_test_table2();
+
+SELECT trigger_name FROM information_schema.triggers;
+
+--Тестовая транзакция
 DO
 $$
 DECLARE
     num_triggers INT;
 BEGIN
     CALL remove_public_triggers(num_triggers);
-    RAISE NOTICE 'Удалено % триггеров', num_triggers;
+    RAISE NOTICE '% of triggers removed', num_triggers;
 END
 $$;
-
-
--- Для теста 
--- Создание таблиц для тестирования
--- CREATE TABLE public.test_table1 (
---     id serial PRIMARY KEY,
---     value INT
--- );
-
--- CREATE TABLE public.test_table2 (
---     id serial PRIMARY KEY,
---     value INT
--- );
-
--- Создание триггеров для тестирования
--- CREATE OR REPLACE FUNCTION trg_before_insert_test_table1()
--- RETURNS TRIGGER AS $$
--- BEGIN
---     RAISE NOTICE 'Trigger trg_before_insert_test_table1 fired';
---     RETURN NEW;
--- END;
--- $$ LANGUAGE plpgsql;
-
--- CREATE TRIGGER trg_before_insert_test_table1
--- BEFORE INSERT ON public.test_table1
--- FOR EACH ROW EXECUTE FUNCTION trg_before_insert_test_table1();
-
--- CREATE OR REPLACE FUNCTION trg_before_update_test_table2()
--- RETURNS TRIGGER AS $$
--- BEGIN
---     RAISE NOTICE 'Trigger trg_before_update_test_table2 fired';
---     RETURN NEW;
--- END;
--- $$ LANGUAGE plpgsql;
-
--- CREATE TRIGGER trg_before_update_test_table2
--- BEFORE UPDATE ON public.test_table2
--- FOR EACH ROW EXECUTE FUNCTION trg_before_update_test_table2();
-
--- SELECT trigger_name FROM information_schema.triggers;
 
 --4 Создать хранимую процедуру с входным параметром, которая выводит имена и описания типа объектов (только хранимых процедур и скалярных функций), 
 --в тексте которых на языке SQL встречается строка, задаваемая параметром процедуры.
 
-CREATE OR REPLACE FUNCTION fn_show_info(search_string TEXT)
-RETURNS TABLE (name TEXT, type TEXT)
-AS
-$$
+CREATE OR REPLACE FUNCTION fn_search_objects(
+    IN search_string TEXT
+)
+RETURNS TABLE (object_name TEXT, object_type TEXT)
+AS $$
+DECLARE
+    object_record RECORD;
 BEGIN
-    RETURN QUERY
-    SELECT routine_name::TEXT,
-           routine_type::TEXT
-    FROM information_schema.routines
-    WHERE routine_name::TEXT LIKE '%' || search_string || '%'
-      AND specific_schema NOT LIKE 'pg_%'  -- Исключаем системные схемы
-      AND specific_schema NOT LIKE 'information_schema';
-END
+
+    -- Вывод объектов в запросе
+    FOR object_record IN
+        SELECT routine_name, routine_type
+        FROM information_schema.routines
+        WHERE routine_definition LIKE '%' || search_string || '%'
+          AND routine_type IN ('FUNCTION', 'PROCEDURE')
+          AND specific_schema = 'public'
+    LOOP
+        -- Возвращаем значения в виде таблицы
+        RETURN QUERY SELECT object_record.routine_name::TEXT, object_record.routine_type::TEXT;
+    END LOOP;
+END;
 $$ LANGUAGE plpgsql;
 
-SELECT * FROM fn_show_info('test');
 
-DROP FUNCTION fn_show_info(text);
+SELECT * FROM fn_search_objects('test');
 
 -- -- Проверяем имя и тип всех функций и процедур, которые были созданы.
--- SELECT routine_name, routine_type
--- FROM information_schema.routines
--- WHERE routine_schema = 'public';
+SELECT routine_name, routine_type
+FROM information_schema.routines
+WHERE routine_schema = 'public';
