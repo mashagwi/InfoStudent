@@ -114,15 +114,15 @@ $$
 LANGUAGE plpgsql;
 
 -- Тестовая транзакция 
-DO
-$$
+DO $$ 
 DECLARE
     num_functions INT;
-    function_info TEXT;
+    function_info TEXT[];
 BEGIN
     CALL get_scalar_functions_info(num_functions, function_info);
-END
-$$;
+    RAISE NOTICE 'Found % scalar functions: %', num_functions, function_info;
+END $$;
+
 
 -- Выводим список всех функций и процедур БД
 SELECT routine_name, routine_type
@@ -211,28 +211,24 @@ CREATE OR REPLACE FUNCTION fn_search_objects(
 )
 RETURNS TABLE (object_name TEXT, object_type TEXT)
 AS $$
-DECLARE
-    object_record RECORD;
 BEGIN
+    RETURN QUERY
+    SELECT routine_name::TEXT, routine_type::TEXT
+    FROM information_schema.routines
+    WHERE routine_definition ILIKE '%' || search_string || '%'
+        AND routine_type IN ('FUNCTION', 'PROCEDURE')
+        AND specific_schema = 'public';
 
-    -- Вывод объектов в запросе
-    FOR object_record IN
-        SELECT routine_name, routine_type
-        FROM information_schema.routines
-        WHERE routine_definition LIKE '%' || search_string || '%'
-          AND routine_type IN ('FUNCTION', 'PROCEDURE')
-          AND specific_schema = 'public'
-    LOOP
-        -- Возвращаем значения в виде таблицы
-        RETURN QUERY SELECT object_record.routine_name::TEXT, object_record.routine_type::TEXT;
-    END LOOP;
+    IF NOT FOUND THEN
+        RETURN;
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
 
+-- Тестовый запрос функции ('test', 'number')
+SELECT * FROM fn_search_objects('name'); 
 
-SELECT * FROM fn_search_objects('test');
-
--- -- Проверяем имя и тип всех функций и процедур, которые были созданы.
+-- Проверяем имя и тип всех функций и процедур, которые были созданы.
 SELECT routine_name, routine_type
 FROM information_schema.routines
 WHERE routine_schema = 'public';
