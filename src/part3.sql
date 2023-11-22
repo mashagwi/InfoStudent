@@ -1,30 +1,30 @@
 -- 1 TASK
-DROP FUNCTION IF EXISTS fnc_calc_transferredpoints();
+DROP FUNCTION IF EXISTS fnc_tranferred_ponts();
 
-CREATE OR REPLACE FUNCTION fnc_calc_transferredpoints()
-RETURNS TABLE (Peer1 varchar, Peer2 varchar, PoinstAmount integer) AS $$
+CREATE OR REPLACE FUNCTION fnc_tranferred_ponts()
+RETURNS TABLE(Peer1 VARCHAR, Peer2 VARCHAR, "PointsAmount" BIGINT) AS $$
 BEGIN
-RETURN QUERY (
-	SELECT t1.checkingpeer,
-	t1.checkedpeer,
-	(t1.pointsamount -t2.pointsamount) AS PoinstAmount
-	FROM transferredpoints AS t1
-	JOIN transferredpoints AS t2 ON
-		t1.checkingpeer = t2.checkedpeer
-		AND t1.checkedpeer = t2.checkingpeer
-		AND t1.id < t2.id);
+	RETURN QUERY
+	WITH reversed AS (
+		SELECT
+			CASE WHEN CheckingPeer > CheckedPeer THEN CheckingPeer ELSE CheckedPeer END AS CheckingPeer,
+			CASE WHEN CheckingPeer > CheckedPeer THEN CheckedPeer ELSE CheckingPeer END AS CheckedPeer,
+			CASE WHEN CheckingPeer > CheckedPeer THEN PointsAmount ELSE -PointsAmount END AS PointsAmount
+		FROM TransferredPoints
+	)
+	SELECT CheckingPeer AS peer1, CheckedPeer AS Peer2, SUM(PointsAmount) FROM reversed
+	GROUP BY CheckingPeer, CheckedPeer;
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT *
-FROM fnc_calc_transferredpoints();
+-- SELECT * FROM fnc_tranferred_ponts();
 
--- 2 TASK NO CORRECT? - should check
+-- 2 TASK
 
 DROP FUNCTION IF EXISTS fnc_get_exp_amount();
 
 CREATE OR REPLACE FUNCTION fnc_get_exp_amount()
-RETURNS TABLE (Peer VARCHAR, Task VARCHAR, XP INTEGER) AS $$
+RETURNS TABLE (Peer VARCHAR, Task VARCHAR, XP BIGINT) AS $$
 BEGIN
 	RETURN QUERY (
 		SELECT checks.peer AS Peer, checks.Task AS Task, xp.xpamount AS XP
@@ -32,6 +32,8 @@ BEGIN
 		JOIN checks ON xp."Check" = checks.id);
 END;
 $$ LANGUAGE plpgsql;
+
+-- SELECT * FROM fnc_get_exp_amount();
 
 -- 3 TASK
 
@@ -49,7 +51,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT * FROM fnc_peers_who_not_out('2024-01-08');
+-- SELECT * FROM fnc_peers_who_not_out('2023-02-25');
 
 -- 4 TASK
 
@@ -76,10 +78,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
-SELECT * FROM calculate_peer_points_change();
+-- SELECT * FROM calculate_peer_points_change();
 
 -- 5 TASK
+CREATE OR REPLACE FUNCTION prp_calc_points_transfer_from_func()
+RETURNS TABLE(Peer VARCHAR, PointsChange NUMERIC) AS $$
+BEGIN
+	RETURN QUERY
+	WITH sums AS (
+		SELECT Peer1 AS Peer, SUM("PointsAmount") AS PointsChange
+		FROM fnc_tranferred_ponts()
+		GROUP BY Peer1
+		UNION 
+		SELECT Peer2 AS Peer, -SUM("PointsAmount") AS PointsChange
+		FROM fnc_tranferred_ponts()
+		GROUP BY Peer2
+	)
+	SELECT sums.Peer, SUM(sums.PointsChange)
+	FROM sums
+	GROUP BY sums.Peer
+	ORDER BY 2 DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- SELECT * FROM prp_calc_points_transfer_from_func();
 
 -- 6 TASK
 CREATE OR REPLACE FUNCTION get_most_checked_task_per_day()
@@ -109,6 +131,31 @@ $$ LANGUAGE plpgsql;
 -- SELECT * FROM get_most_checked_task_per_day();
 
 -- 7 TASK
+CREATE OR REPLACE FUNCTION check_peers_who_finished_block(task_block VARCHAR)
+RETURNS TABLE (Peer VARCHAR, "Day" DATE ) AS $$
+BEGIN
+RETURN QUERY
+	WITH list_tasks_of_block AS (
+    	SELECT DISTINCT Task
+    	FROM Checks
+    	WHERE Task LIKE '%' || task_block || '%'
+    	ORDER BY 1
+	)
+	SELECT checks.peer, MAX(date)
+	FROM checks 
+	JOIN p2p ON p2p."Check" = checks.id
+	WHERE 
+    	Task LIKE '%' || task_block || '%'
+    	AND p2p."State" = 'Success'
+	GROUP BY checks.peer
+	HAVING COUNT(DISTINCT Task) = (SELECT COUNT(*) FROM list_tasks_of_block)
+	ORDER BY 1;
+END;
+$$ LANGUAGE plpgsql;
+
+-- SELECT * FROM check_peers_who_finished_block('CPP');
+
+
 -- 8 TASK
 CREATE OR REPLACE FUNCTION find_peer_recommendations()
 RETURNS TABLE (

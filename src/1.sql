@@ -430,7 +430,7 @@ insert into timetracking values(fnc_next_id('timetracking'), 'username3', '2024-
 
 insert into timetracking values(fnc_next_id('timetracking'), 'username2', '2024-01-08', '00:00:00', 1);
 insert into timetracking values(fnc_next_id('timetracking'), 'username2', '2024-01-08', '23:59:59', 2);
-insert into timetracking values(fnc_next_id('timetracking'), 'username3', '2024-01-08', '00:00:00', 1);\
+insert into timetracking values(fnc_next_id('timetracking'), 'username3', '2024-01-08', '00:00:00', 1);
 
 
 insert into friends values(fnc_next_id('friends'), 'norridge', 'georgier');
