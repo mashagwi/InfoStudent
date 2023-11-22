@@ -121,6 +121,7 @@ DECLARE
 BEGIN
     CALL get_scalar_functions_info(num_functions, function_info);
     RAISE NOTICE 'Found % scalar functions: %', num_functions, function_info;
+
 END $$;
 
 
@@ -206,7 +207,10 @@ $$;
 --4 Создать хранимую процедуру с входным параметром, которая выводит имена и описания типа объектов (только хранимых процедур и скалярных функций), 
 --в тексте которых на языке SQL встречается строка, задаваемая параметром процедуры.
 
-CREATE OR REPLACE FUNCTION fn_search_objects(
+--Вариант 1. FUNCTION
+--Вместо использования OUT параметров, можно воспользоваться FUNCTION, которая возвращает набор результатов в виде таблицы.
+
+CREATE OR REPLACE FUNCTION fn_search_objects1(
     IN search_string TEXT
 )
 RETURNS TABLE (object_name TEXT, object_type TEXT)
@@ -226,9 +230,51 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Тестовый запрос функции ('test', 'number')
-SELECT * FROM fn_search_objects('name'); 
+SELECT * FROM fn_search_objects1('name'); 
 
--- Проверяем имя и тип всех функций и процедур, которые были созданы.
-SELECT routine_name, routine_type
-FROM information_schema.routines
-WHERE routine_schema = 'public';
+--Вариант 2. PROCEDURE
+
+CREATE OR REPLACE PROCEDURE sp_search_objects2(
+    IN search_string TEXT,
+    OUT object_name TEXT,
+    OUT object_type TEXT
+)
+AS
+$$
+DECLARE
+    result_record RECORD;
+BEGIN
+    -- Создаем временную таблицу для хранения результатов
+    CREATE TEMP TABLE temp_result AS
+    SELECT DISTINCT routine_name::TEXT, routine_type::TEXT
+    FROM information_schema.routines
+    WHERE routine_definition ILIKE '%' || search_string || '%'
+        AND routine_type IN ('PROCEDURE', 'FUNCTION')
+        AND specific_schema = 'public';
+
+    -- Выводим результаты из временной таблицы
+    FOR result_record IN (SELECT * FROM temp_result)
+    LOOP
+        -- Присваиваем значения OUT-параметрам
+        object_name := result_record.routine_name;
+        object_type := result_record.routine_type;
+
+        RAISE NOTICE 'Object Name: %, Object Type: %', object_name, object_type;
+    END LOOP;
+
+    -- Удаляем временную таблицу
+    DROP TABLE IF EXISTS temp_result;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Тест со строкой поиска ('test', 'number')
+DO $$ 
+DECLARE
+    result_name TEXT;
+    result_type TEXT;
+BEGIN
+    CALL sp_search_objects2('name', result_name, result_type);
+
+END $$;
+
