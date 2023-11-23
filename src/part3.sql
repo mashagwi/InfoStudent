@@ -176,7 +176,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- SELECT * FROM find_peer_recommendations();
+-- 9 TASK
 
+-- 10 TASK
+-- 11 TASK
 
 -- 12 TASK
 
@@ -232,8 +235,23 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- SELECT * FROM find_peer_with_highest_xp();
+-- 15 TASK 
+CREATE OR REPLACE FUNCTION early_coming_peers(determinated_time TIME, N INTEGER)
+RETURNS TABLE (peer VARCHAR)
+AS $$
+BEGIN
+	RETURN QUERY
+		SELECT t.peer 
+		FROM TimeTracking AS t
+		WHERE t."Time" < determinated_time
+		GROUP BY t.peer
+		HAVING COUNT(*) >= N;
+END;
+$$ LANGUAGE PLPGSQL;
 
--- task 17
+SELECT * FROM early_coming_peers('12:00:00', 3);
+-- 16 TASK
+-- 17 TASK
 CREATE OR REPLACE FUNCTION calculate_early_entries_percentage()
 RETURNS TABLE (
     Month text,
