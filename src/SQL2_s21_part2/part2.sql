@@ -1,4 +1,5 @@
--- Active: 1699327853942@@127.0.0.1@5432@sq2
+-- Active: 1699327853942@@127.0.0.1@5432@s21_info
+
 ------- упражнеие 1 --------
 CREATE OR REPLACE PROCEDURE pcr_add_p2p_check(checked_peer VARCHAR, checking_peer VARCHAR, task_name VARCHAR, p2p_state check_status, check_time time)
 LANGUAGE PLPGSQL AS $$
@@ -24,7 +25,7 @@ BEGIN
 
     INSERT INTO Verter("Check", "State", "Time")
     SELECT (SELECT "Check" FROM p2p_latest_by_time_succses), verter_state, check_time
-    WHERE EXISTS (SELECT 1 FROM p2p_latest_by_time_succses)
+    WHERE EXISTS (SELECT 1 FROM p2p_latest_by_time_succses);
 END; 
 $$;
 

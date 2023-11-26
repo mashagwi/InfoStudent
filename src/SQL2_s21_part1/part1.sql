@@ -1,5 +1,6 @@
+-- Active: 1699327853942@@127.0.0.1@5432@s21_info
 
-CREATE DATABASE S21_Info;
+CREATE OR REPLACE DATABASE S21_Info;
 
 CREATE TABLE IF NOT EXISTS  Peers(
     Nickname VARCHAR NOT NULL PRIMARY KEY,
@@ -110,21 +111,48 @@ BEFORE INSERT OR UPDATE ON Tasks
 FOR EACH ROW
 EXECUTE FUNCTION fnc_trg_tasks_insert_update();
 
-CREATE OR REPLACE FUNCTION fnc_p2p_or_verter_insert_update()
+CREATE OR REPLACE FUNCTION fnc_p2p_insert_update()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW."State" = 'Start' THEN
         IF EXISTS (
-            SELECT "State" FROM TG_TABLE_NAME WHERE id = NEW.id AND "State" = 'Start'
-        ) THEN RAISE EXCEPTION 'Проверка имеет уже статус Start';
+                SELECT "State" FROM P2P WHERE id = NEW.id AND "State" = 'Start'
+            ) THEN RAISE EXCEPTION 'Проверка имеет уже статус Start';
+        END IF;
     ELSE
         IF NEW."Time" <= (
-            SELECT "Time" FROM TG_TABLE_NAME WHERE NEW."Check" = P2P."Check"
-            ORDER BY "TIME" DESC LIMIT 1)
-        THEN RAISE EXCEPTION 'Проверка не может быть завершена раньше, чем она начнется';
+                SELECT "Time" FROM P2P WHERE NEW."Check" = P2P."Check"
+                ORDER BY "Time" DESC LIMIT 1           
+            )
+            THEN RAISE EXCEPTION 'Проверка не может быть завершена раньше, чем она начнется';
+        END IF;
         IF NOT EXISTS (	
-            SELECT * FROM TG_TABLE_NAME WHERE "Check" = NEW."Check" AND "State" = 'Start'
-		) THEN RAISE EXCEPTION 'У проверки нет записи со статусом Start';
+                SELECT * FROM P2P WHERE "Check" = NEW."Check" AND "State" = 'Start'
+		    ) THEN RAISE EXCEPTION 'У проверки нет записи со статусом Start';
+		END IF;
+    END IF;
+    RETURN NEW;    
+END;
+$$ LANGUAGE PLPGSQL;
+
+CREATE OR REPLACE FUNCTION fnc_verter_insert_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW."State" = 'Start' THEN
+        IF EXISTS (
+                 SELECT "State" FROM Verter WHERE id = NEW.id AND "State" = 'Start'
+            ) THEN RAISE EXCEPTION 'Проверка имеет уже статус Start';
+        END IF;
+    ELSE
+        IF NEW."Time" <= (
+                SELECT "Time" FROM Verter WHERE NEW."Check" = P2P."Check"
+                ORDER BY "Time" DESC LIMIT 1
+            )
+            THEN RAISE EXCEPTION 'Проверка не может быть завершена раньше, чем она начнется';
+        END IF;
+        IF NOT EXISTS (	
+                SELECT * FROM Verter WHERE "Check" = NEW."Check" AND "State" = 'Start'
+		    ) THEN RAISE EXCEPTION 'У проверки нет записи со статусом Start';
 		END IF;
     END IF;
     RETURN NEW;    
@@ -134,25 +162,28 @@ $$ LANGUAGE PLPGSQL;
 CREATE TRIGGER trg_p2p_insert_update
 BEFORE INSERT OR UPDATE ON P2P
 FOR EACH ROW
-EXECUTE FUNCTION fnc_p2p_or_verter_insert_update();
+EXECUTE FUNCTION fnc_p2p_insert_update();
 
 CREATE TRIGGER trg_verter_insert_update
-BEFORE INSERT OR UPDATE ON P2P
+BEFORE INSERT OR UPDATE ON Verter
 FOR EACH ROW
-EXECUTE FUNCTION fnc_p2p_or_verter_insert_update();
+EXECUTE FUNCTION fnc_verter_insert_update();
 
------------- импорт из CSV ---------------
-CREATE OR REPLACE PROCEDURE prc_import_csv(table_name TEXT, path_file TEXT)
+
+------------ экспорт в CSV ---------------
+CREATE OR REPLACE PROCEDURE prc_export_csv(name_table TEXT, path_file TEXT)
 LANGUAGE PLPGSQL AS $$
 BEGIN
-    EXECUTE CONCAT('COPY ', table_name, ' FROM ', path_file, ' WITH CSV HEADER');
+    EXECUTE FORMAT('COPY %s TO %L WITH CSV HEADER;', name_table, path_file);
 END;
 $$;
 
------------- экспорт в CSV ---------------
-CREATE OR REPLACE PROCEDURE prc_export_csv(table_name TEXT, path_file TEXT)
+CALL prc_export_csv('peers', )
+
+------------ импорт из CSV ---------------
+CREATE OR REPLACE PROCEDURE prc_import_csv(name_table TEXT, path_file TEXT)
 LANGUAGE PLPGSQL AS $$
 BEGIN
-    EXECUTE CONCAT('COPY ', table_name, ' TO ', path_file, ' WITH CSV HEADER');
+    EXECUTE FORMAT('COPY %s FROM %L WITH CSV HEADER;', name_table, path_file);
 END;
 $$;
