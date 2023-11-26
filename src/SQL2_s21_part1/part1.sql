@@ -1,6 +1,4 @@
--- Active: 1699327853942@@127.0.0.1@5432@s21_info
-
-CREATE OR REPLACE DATABASE S21_Info;
+CREATE DATABASE S21_Info;
 
 CREATE TABLE IF NOT EXISTS  Peers(
     Nickname VARCHAR NOT NULL PRIMARY KEY,
@@ -178,7 +176,8 @@ BEGIN
 END;
 $$;
 
-CALL prc_export_csv('peers', )
+--CALL prc_export_csv('peers', '/tmp/peers.csv');
+--TRUNCATE peers CASCADE;
 
 ------------ импорт из CSV ---------------
 CREATE OR REPLACE PROCEDURE prc_import_csv(name_table TEXT, path_file TEXT)
@@ -187,3 +186,5 @@ BEGIN
     EXECUTE FORMAT('COPY %s FROM %L WITH CSV HEADER;', name_table, path_file);
 END;
 $$;
+
+--CALL prc_import_csv('peers', '/tmp/peers.csv');

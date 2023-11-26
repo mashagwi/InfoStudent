@@ -1,5 +1,3 @@
--- Active: 1699327853942@@127.0.0.1@5432@s21_info
-
 insert into peers values('norridge', '1989-04-02');
 insert into peers values('georgier', '1999-02-05');
 insert into peers values('hildabur', '1999-10-15');
@@ -69,7 +67,6 @@ insert into transferredpoints("checkingpeer","checkedpeer","pointsamount") value
 insert into transferredpoints("checkingpeer","checkedpeer","pointsamount") values ('mavissig', 'lassandra', 1);
 insert into transferredpoints("checkingpeer","checkedpeer","pointsamount") values ('georgier', 'vulpixta', 1);
 
-TRUNCATE tasks CASCADE;
 
 insert into tasks values('DO1', null, 300);
 insert into tasks values('DO2', 'DO1', 250);
@@ -332,183 +329,182 @@ insert into p2p("Check","checkingpeer","State","Time") values(54, 'mashagwi', 'S
 insert into p2p("Check","checkingpeer","State","Time") values(54, 'mashagwi', 'Success', '21:30:55');
 
 
-insert into timetracking values(fnc_next_id('timetracking'), 'norridge', '2023-12-01', '11:24:11', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'norridge', '2023-12-01', '23:42:00', 2);
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-12-01', '11:24:11', 1);
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-12-01', '23:42:00', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'hildabur', '2023-12-01', '09:05:54', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'hildabur', '2023-12-01', '23:42:00', 2);
+insert into timetracking("peer","Date","Time","State") values('hildabur', '2023-12-01', '09:05:54', 1);
+insert into timetracking("peer","Date","Time","State") values('hildabur', '2023-12-01', '23:42:00', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'georgier', '2023-12-05', '13:44:01', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'georgier', '2023-12-05', '23:42:00', 2);
+insert into timetracking("peer","Date","Time","State") values('georgier', '2023-12-05', '13:44:01', 1);
+insert into timetracking("peer","Date","Time","State") values('georgier', '2023-12-05', '23:42:00', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'vulpixta', '2023-12-07', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'vulpixta', '2023-12-07', '23:59:59', 2);
+insert into timetracking("peer","Date","Time","State") values('vulpixta', '2023-12-07', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('vulpixta', '2023-12-07', '23:59:59', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'hildabur', '2023-12-10', '23:59:59', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'hildabur', '2023-12-11', '02:42:59', 2);
+insert into timetracking("peer","Date","Time","State") values('hildabur', '2023-12-10', '23:59:59', 1);
+insert into timetracking("peer","Date","Time","State") values('hildabur', '2023-12-11', '02:42:59', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-12-11', '05:41:34', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-12-11', '20:30:47', 2);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-12-11', '05:41:34', 1);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-12-11', '20:30:47', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-12-24', '10:14:22', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-12-24', '12:29:17', 2);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-12-24', '10:14:22', 1);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-12-24', '12:29:17', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'lassandra', '2023-12-28', '20:30:47', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'lassandra', '2023-12-29', '00:49:44', 2);
+insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-12-28', '20:30:47', 1);
+insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-12-29', '00:49:44', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'lassandra', '2023-12-30', '13:49:44', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'lassandra', '2023-12-31', '05:17:02', 2);
+insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-12-30', '13:49:44', 1);
+insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-12-31', '05:17:02', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'vulpixta', '2023-12-30', '19:07:45', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'vulpixta', '2023-12-31', '03:17:55', 2);
+insert into timetracking("peer","Date","Time","State") values('vulpixta', '2023-12-30', '19:07:45', 1);
+insert into timetracking("peer","Date","Time","State") values('vulpixta', '2023-12-31', '03:17:55', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-01-01', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-01-01', '23:59:59', 2);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-01-01', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-01-01', '23:59:59', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'hildabur', '2023-01-01', '10:10:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'hildabur', '2023-01-01', '22:05:59', 2);
+insert into timetracking("peer","Date","Time","State") values('hildabur', '2023-01-01', '10:10:00', 1);
+insert into timetracking("peer","Date","Time","State") values('hildabur', '2023-01-01', '22:05:59', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'vulpixta', '2023-01-01', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'vulpixta', '2023-01-01', '00:59:59', 2);
+insert into timetracking("peer","Date","Time","State") values('vulpixta', '2023-01-01', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('vulpixta', '2023-01-01', '00:59:59', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'mavissig', '2023-01-10', '08:50:52', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'mavissig', '2023-01-10', '17:04:02', 2);
+insert into timetracking("peer","Date","Time","State") values('mavissig', '2023-01-10', '08:50:52', 1);
+insert into timetracking("peer","Date","Time","State") values('mavissig', '2023-01-10', '17:04:02', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'hildabur', '2023-01-20', '15:59:59', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'hildabur', '2023-01-20', '23:59:52', 2);
+insert into timetracking("peer","Date","Time","State") values('hildabur', '2023-01-20', '15:59:59', 1);
+insert into timetracking("peer","Date","Time","State") values('hildabur', '2023-01-20', '23:59:52', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-01-30', '09:41:34', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-01-30', '20:00:47', 2);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-01-30', '09:41:34', 1);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-01-30', '20:00:47', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'lassandra', '2023-02-04', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'lassandra', '2023-02-05', '00:50:44', 2);
+insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-02-04', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-02-05', '00:50:44', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'norridge', '2023-02-04', '03:15:54', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'norridge', '2023-02-04', '11:24:14', 2);
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-02-04', '03:15:54', 1);
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-02-04', '11:24:14', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'georgier', '2023-02-05', '11:01:45', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'georgier', '2023-02-05', '19:14:34', 2);
+insert into timetracking("peer","Date","Time","State") values('georgier', '2023-02-05', '11:01:45', 1);
+insert into timetracking("peer","Date","Time","State") values('georgier', '2023-02-05', '19:14:34', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'lassandra', '2023-02-12', '21:14:05', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'lassandra', '2023-02-13', '00:07:42', 2);
+insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-02-12', '21:14:05', 1);
+insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-02-13', '00:07:42', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'georgier', '2023-02-16', '13:49:44', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'georgier', '2023-02-17', '05:17:02', 2);
+insert into timetracking("peer","Date","Time","State") values('georgier', '2023-02-16', '13:49:44', 1);
+insert into timetracking("peer","Date","Time","State") values('georgier', '2023-02-17', '05:17:02', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'mavissig', '2023-02-25', '19:07:45', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'mavissig', '2023-02-25', '22:14:04', 2);
+insert into timetracking("peer","Date","Time","State") values('mavissig', '2023-02-25', '19:07:45', 1);
+insert into timetracking("peer","Date","Time","State") values('mavissig', '2023-02-25', '22:14:04', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'vulpixta', '2023-02-27', '10:08:21', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'vulpixta', '2023-02-27', '20:05:17', 2);
+insert into timetracking("peer","Date","Time","State") values('vulpixta', '2023-02-27', '10:08:21', 1);
+insert into timetracking("peer","Date","Time","State") values('vulpixta', '2023-02-27', '20:05:17', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-03-07', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-03-08', '09:04:16', 2);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-03-07', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-03-08', '09:04:16', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'mavissig', '2023-03-07', '01:14:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'mavissig', '2023-03-07', '17:04:02', 2);
+insert into timetracking("peer","Date","Time","State") values('mavissig', '2023-03-07', '01:14:00', 1);
+insert into timetracking("peer","Date","Time","State") values('mavissig', '2023-03-07', '17:04:02', 2);
 
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-03-08', '19:50:52', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'mashagwi', '2023-03-08', '21:04:02', 2);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-03-08', '19:50:52', 1);
+insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-03-08', '21:04:02', 2);
+
+/*
+insert into timetracking("peer","Date","Time","State") values('username1', '2024-01-01', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('username1', '2024-01-01', '23:59:58', 2);
+
+insert into timetracking("peer","Date","Time","State") values('username1', '2024-01-02', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('username1', '2024-01-02', '23:59:59', 2);
+
+insert into timetracking("peer","Date","Time","State") values('username1', '2024-01-03', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('username1', '2024-01-04', '00:00:00', 2);
+
+insert into timetracking("peer","Date","Time","State") values('username2', '2024-01-05', '12:53:21', 1);
+insert into timetracking("peer","Date","Time","State") values('username2', '2024-01-05', '21:01:31', 2);
+
+insert into timetracking("peer","Date","Time","State") values('username2', '2024-01-06', '13:22:13', 1);
+insert into timetracking("peer","Date","Time","State") values('username2', '2024-01-06', '16:21:53', 2);
+
+insert into timetracking("peer","Date","Time","State") values('username3', '2024-01-07', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('username3', '2024-01-07', '23:59:59', 2);
+
+insert into timetracking("peer","Date","Time","State") values('username2', '2024-01-08', '00:00:00', 1);
+insert into timetracking("peer","Date","Time","State") values('username2', '2024-01-08', '23:59:59', 2);
+insert into timetracking("peer","Date","Time","State") values('username3', '2024-01-08', '00:00:00', 1);
+*/
+
+insert into friends("peer1","peer2") values('norridge', 'georgier');
+insert into friends("peer1","peer2") values('norridge', 'mavissig');
+insert into friends("peer1","peer2") values('norridge', 'lassandra');
+insert into friends("peer1","peer2") values('georgier', 'hildabur');
+insert into friends("peer1","peer2") values('georgier', 'mavissig');
+insert into friends("peer1","peer2") values('hildabur', 'lassandra');
+insert into friends("peer1","peer2") values('hildabur', 'vulpixta');
+insert into friends("peer1","peer2") values('vulpixta', 'norridge');
+insert into friends("peer1","peer2") values('vulpixta', 'mashagwi');
+insert into friends("peer1","peer2") values('mashagwi', 'norridge');
+insert into friends("peer1","peer2") values('mavissig', 'hildabur');
+insert into friends("peer1","peer2") values('lassandra', 'mavissig');
+
+insert into recommendations("peer", "recommendedpeer") values('norridge', 'hildabur');
+insert into recommendations("peer", "recommendedpeer") values('norridge', 'vulpixta');
+insert into recommendations("peer", "recommendedpeer") values('norridge', 'mashagwi');
+insert into recommendations("peer", "recommendedpeer") values('georgier', 'vulpixta');
+insert into recommendations("peer", "recommendedpeer") values('hildabur', 'mavissig');
+insert into recommendations("peer", "recommendedpeer") values('hildabur', 'lassandra');
+insert into recommendations("peer", "recommendedpeer") values('vulpixta', 'georgier');
+insert into recommendations("peer", "recommendedpeer") values('vulpixta', 'lassandra');
+insert into recommendations("peer", "recommendedpeer") values('mashagwi', 'lassandra');
+insert into recommendations("peer", "recommendedpeer") values('mashagwi', 'norridge');
+insert into recommendations("peer", "recommendedpeer") values('mashagwi', 'vulpixta');
+insert into recommendations("peer", "recommendedpeer") values('mashagwi', 'mavissig');
+insert into recommendations("peer", "recommendedpeer") values('lassandra', 'georgier');
+insert into recommendations("peer", "recommendedpeer") values('mavissig', 'georgier');
+insert into recommendations("peer", "recommendedpeer") values('mavissig', 'vulpixta');
+insert into recommendations("peer", "recommendedpeer") values('mavissig', 'lassandra');
 
 
-insert into timetracking values(fnc_next_id('timetracking'), 'username1', '2024-01-01', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'username1', '2024-01-01', '23:59:58', 2);
-
-insert into timetracking values(fnc_next_id('timetracking'), 'username1', '2024-01-02', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'username1', '2024-01-02', '23:59:59', 2);
-
-insert into timetracking values(fnc_next_id('timetracking'), 'username1', '2024-01-03', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'username1', '2024-01-04', '00:00:00', 2);
-
-insert into timetracking values(fnc_next_id('timetracking'), 'username2', '2024-01-05', '12:53:21', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'username2', '2024-01-05', '21:01:31', 2);
-
-insert into timetracking values(fnc_next_id('timetracking'), 'username2', '2024-01-06', '13:22:13', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'username2', '2024-01-06', '16:21:53', 2);
-
-insert into timetracking values(fnc_next_id('timetracking'), 'username3', '2024-01-07', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'username3', '2024-01-07', '23:59:59', 2);
-
-insert into timetracking values(fnc_next_id('timetracking'), 'username2', '2024-01-08', '00:00:00', 1);
-insert into timetracking values(fnc_next_id('timetracking'), 'username2', '2024-01-08', '23:59:59', 2);
-insert into timetracking values(fnc_next_id('timetracking'), 'username3', '2024-01-08', '00:00:00', 1);\
-
-
-insert into friends values(fnc_next_id('friends'), 'norridge', 'georgier');
-insert into friends values(fnc_next_id('friends'), 'norridge', 'mavissig');
-insert into friends values(fnc_next_id('friends'), 'norridge', 'lassandra');
-insert into friends values(fnc_next_id('friends'), 'georgier', 'hildabur');
-insert into friends values(fnc_next_id('friends'), 'georgier', 'mavissig');
-insert into friends values(fnc_next_id('friends'), 'hildabur', 'lassandra');
-insert into friends values(fnc_next_id('friends'), 'hildabur', 'vulpixta');
-insert into friends values(fnc_next_id('friends'), 'vulpixta', 'norridge');
-insert into friends values(fnc_next_id('friends'), 'vulpixta', 'mashagwi');
-insert into friends values(fnc_next_id('friends'), 'mashagwi', 'norridge');
-insert into friends values(fnc_next_id('friends'), 'mavissig', 'hildabur');
-insert into friends values(fnc_next_id('friends'), 'lassandra', 'mavissig');
-
-
-insert into recommendations values(fnc_next_id('recommendations'), 'norridge', 'hildabur');
-insert into recommendations values(fnc_next_id('recommendations'), 'norridge', 'vulpixta');
-insert into recommendations values(fnc_next_id('recommendations'), 'norridge', 'mashagwi');
-insert into recommendations values(fnc_next_id('recommendations'), 'georgier', 'vulpixta');
-insert into recommendations values(fnc_next_id('recommendations'), 'hildabur', 'mavissig');
-insert into recommendations values(fnc_next_id('recommendations'), 'hildabur', 'lassandra');
-insert into recommendations values(fnc_next_id('recommendations'), 'vulpixta', 'georgier');
-insert into recommendations values(fnc_next_id('recommendations'), 'vulpixta', 'lassandra');
-insert into recommendations values(fnc_next_id('recommendations'), 'mashagwi', 'lassandra');
-insert into recommendations values(fnc_next_id('recommendations'), 'mashagwi', 'norridge');
-insert into recommendations values(fnc_next_id('recommendations'), 'mashagwi', 'vulpixta');
-insert into recommendations values(fnc_next_id('recommendations'), 'mashagwi', 'mavissig');
-insert into recommendations values(fnc_next_id('recommendations'), 'lassandra', 'georgier');
-insert into recommendations values(fnc_next_id('recommendations'), 'mavissig', 'georgier');
-insert into recommendations values(fnc_next_id('recommendations'), 'mavissig', 'vulpixta');
-insert into recommendations values(fnc_next_id('recommendations'), 'mavissig', 'lassandra');
-
-
-insert into xp values(fnc_next_id('xp'), 1, 300);
-insert into xp values(fnc_next_id('xp'), 2, 300);
-insert into xp values(fnc_next_id('xp'), 3, 300);
-insert into xp values(fnc_next_id('xp'), 4, 400);
-insert into xp values(fnc_next_id('xp'), 5, 240);
-insert into xp values(fnc_next_id('xp'), 6, 400);
-insert into xp values(fnc_next_id('xp'), 7, 300);
-insert into xp values(fnc_next_id('xp'), 8, 350);
-insert into xp values(fnc_next_id('xp'), 9, 300);
-insert into xp values(fnc_next_id('xp'), 10, 350);
-insert into xp values(fnc_next_id('xp'), 11, 350);
-insert into xp values(fnc_next_id('xp'), 12, 350);
-insert into xp values(fnc_next_id('xp'), 13, 400);
-insert into xp values(fnc_next_id('xp'), 14, 300);
-insert into xp values(fnc_next_id('xp'), 16, 400);
-insert into xp values(fnc_next_id('xp'), 17, 290);
-insert into xp values(fnc_next_id('xp'), 18, 240);
-insert into xp values(fnc_next_id('xp'), 19, 300);
-insert into xp values(fnc_next_id('xp'), 20, 700);
-insert into xp values(fnc_next_id('xp'), 21, 700);
-insert into xp values(fnc_next_id('xp'), 22, 300);
-insert into xp values(fnc_next_id('xp'), 23, 300);
-insert into xp values(fnc_next_id('xp'), 24, 800);
-insert into xp values(fnc_next_id('xp'), 25, 800);
-insert into xp values(fnc_next_id('xp'), 26, 300);
-insert into xp values(fnc_next_id('xp'), 27, 300);
-insert into xp values(fnc_next_id('xp'), 29, 400);
-insert into xp values(fnc_next_id('xp'), 30, 400);
-insert into xp values(fnc_next_id('xp'), 31, 300);
-insert into xp values(fnc_next_id('xp'), 32, 300);
-insert into xp values(fnc_next_id('xp'), 33, 300);
-insert into xp values(fnc_next_id('xp'), 35, 800);
-insert into xp values(fnc_next_id('xp'), 36, 340);
-insert into xp values(fnc_next_id('xp'), 38, 350);
-insert into xp values(fnc_next_id('xp'), 40, 1500);
-insert into xp values(fnc_next_id('xp'), 41, 800);
-insert into xp values(fnc_next_id('xp'), 43, 1400);
-insert into xp values(fnc_next_id('xp'), 44, 1500);
-insert into xp values(fnc_next_id('xp'), 45, 390);
-insert into xp values(fnc_next_id('xp'), 46, 500);
-insert into xp values(fnc_next_id('xp'), 47, 500);
-insert into xp values(fnc_next_id('xp'), 50, 580);
-insert into xp values(fnc_next_id('xp'), 51, 250);
-insert into xp values(fnc_next_id('xp'), 52, 1450);
-insert into xp values(fnc_next_id('xp'), 53, 400);
-insert into xp values(fnc_next_id('xp'), 54, 300);
+insert into xp("Check","xpamount") values(1, 300);
+insert into xp("Check","xpamount") values(2, 300);
+insert into xp("Check","xpamount") values(3, 300);
+insert into xp("Check","xpamount") values(4, 400);
+insert into xp("Check","xpamount") values(5, 240);
+insert into xp("Check","xpamount") values(6, 400);
+insert into xp("Check","xpamount") values(7, 300);
+insert into xp("Check","xpamount") values(8, 350);
+insert into xp("Check","xpamount") values(9, 300);
+insert into xp("Check","xpamount") values(10, 350);
+insert into xp("Check","xpamount") values(11, 350);
+insert into xp("Check","xpamount") values(12, 350);
+insert into xp("Check","xpamount") values(13, 400);
+insert into xp("Check","xpamount") values(14, 300);
+insert into xp("Check","xpamount") values(16, 400);
+insert into xp("Check","xpamount") values(17, 290);
+insert into xp("Check","xpamount") values(18, 240);
+insert into xp("Check","xpamount") values(19, 300);
+insert into xp("Check","xpamount") values(20, 700);
+insert into xp("Check","xpamount") values(21, 700);
+insert into xp("Check","xpamount") values(22, 300);
+insert into xp("Check","xpamount") values(23, 300);
+insert into xp("Check","xpamount") values(24, 800);
+insert into xp("Check","xpamount") values(25, 800);
+insert into xp("Check","xpamount") values(26, 300);
+insert into xp("Check","xpamount") values(27, 300);
+insert into xp("Check","xpamount") values(29, 400);
+insert into xp("Check","xpamount") values(30, 400);
+insert into xp("Check","xpamount") values(31, 300);
+insert into xp("Check","xpamount") values(32, 300);
+insert into xp("Check","xpamount") values(33, 300);
+insert into xp("Check","xpamount") values(35, 800);
+insert into xp("Check","xpamount") values(36, 340);
+insert into xp("Check","xpamount") values(38, 350);
+insert into xp("Check","xpamount") values(40, 1500);
+insert into xp("Check","xpamount") values(41, 800);
+insert into xp("Check","xpamount") values(43, 1400);
+insert into xp("Check","xpamount") values(44, 1500);
+insert into xp("Check","xpamount") values(45, 390);
+insert into xp("Check","xpamount") values(46, 500);
+insert into xp("Check","xpamount") values(47, 500);
+insert into xp("Check","xpamount") values(50, 580);
+insert into xp("Check","xpamount") values(51, 250);
+insert into xp("Check","xpamount") values(52, 1450);
+insert into xp("Check","xpamount") values(53, 400);
+insert into xp("Check","xpamount") values(54, 300);
