@@ -13,12 +13,12 @@ BEGIN
 END; 
 $$;
 
-/*
-insert into peers values ('braavoss', '1989-06-08');
-insert into peers values ('aemmafre', '1999-06-08');
-CALL pcr_add_p2p_check('braavoss', 'aemmafre', 'DO1', 'Start', '13:01:52');
-SELECT * FROM p2p WHERE CheckingPeer = 'aemmafre';
-*/
+
+--insert into peers values ('braavoss', '1989-06-08');
+--insert into peers values ('aemmafre', '1999-06-08');
+--CALL pcr_add_p2p_check('braavoss', 'aemmafre', 'DO1', 'Start', '13:01:52');
+--SELECT * FROM p2p WHERE CheckingPeer = 'aemmafre';
+
 
 ------- упражнеие 2 --------
 CREATE OR REPLACE PROCEDURE pcr_add_verter_check(checked_peer VARCHAR, task_name VARCHAR, verter_state check_status, check_time time)
@@ -36,6 +36,8 @@ END;
 $$;
 
 --CALL pcr_add_verter_check('braavoss','CPP4','Start','13:02:09');
+--SELECT * FROM Verter;
+
 
 ------- упражнеие 3 --------
 CREATE OR REPLACE FUNCTION fnc_trg_after_insert_p2p()
@@ -45,7 +47,7 @@ BEGIN
     SELECT Peer INTO peer_value FROM Checks
     WHERE Checks.ID = NEW."Check"
     LIMIT 1;
-    IF NEW."State" = 'Start' THEN
+    IF NEW."State" IN ('Success', 'Failure') THEN
         UPDATE TransferredPoints SET PointsAmount = PointsAmount + 1
         WHERE TransferredPoints.CheckingPeer = NEW.CheckingPeer
         AND peer_value = TransferredPoints.CheckedPeer;
@@ -57,10 +59,7 @@ BEGIN
 			AND peer_value = TransferredPoints.CheckedPeer
 		) THEN
 		INSERT INTO TransferredPoints(CheckingPeer, CheckedPeer)
-		VALUES(NEW.CheckingPeer, (SELECT Peer
-							FROM Checks
-							WHERE Checks.ID = NEW."Check"
-							LIMIT 1));
+		VALUES(NEW.CheckingPeer, peer_value);
 		END IF;
     END IF;
     RETURN NEW;
@@ -73,7 +72,9 @@ FOR EACH ROW
 EXECUTE FUNCTION fnc_trg_after_insert_p2p();
 
 --INSERT INTO Checks(Peer,Task,Date) VALUES ('lassandra','CPP5',CURRENT_DATE);
---INSERT INTO p2p("Check","checkingpeer","State","Time") VALUES (( SELECT max(id) FROM Checks ), 'aemmafre', 'Success', '01:01:07');
+--INSERT INTO p2p("Check","checkingpeer","State","Time") VALUES (( SELECT max(id) FROM Checks ), 'aemmafre', 'Start', '01:01:07');
+--INSERT INTO p2p("Check","checkingpeer","State","Time") VALUES (( SELECT max(id) FROM Checks ), 'aemmafre', 'Success', '02:01:07');
+--SELECT * FROM TransferredPoints WHERE CheckingPeer = 'aemmafre';
 
 ------- упражнеие 4 --------
 CREATE OR REPLACE FUNCTION fnc_trg_before_insert_xp()
@@ -89,6 +90,7 @@ BEGIN
         WHERE P2P."Check" = NEW."Check" AND P2P."State" = 'Success' AND Verter."State" IN ('Success', NULL)) = 0
     THEN RAISE EXCEPTION 'Нельзя добавить XP за неуспешную проверку.';
     END IF;
+    RETURN NEW;
 END;
 $$ LANGUAGE PLPGSQL;
 
@@ -97,6 +99,7 @@ AFTER INSERT ON XP
 FOR EACH ROW
 EXECUTE FUNCTION fnc_trg_before_insert_xp();
 
-INSERT INTO verter("Check","State","Time") VALUES (47, 'Start', '22:01:07');
-INSERT INTO verter("Check","State","Time") VALUES (47, 'Success', '23:01:07');
-INSERT INTO xp("Check","xpamount") VALUES (51, 250);
+--INSERT INTO verter("Check","State","Time") VALUES ((SELECT max(id) FROM Checks), 'Start', '22:01:07');
+--INSERT INTO verter("Check","State","Time") VALUES ((SELECT max(id) FROM Checks), 'Success', '23:01:07');
+--INSERT INTO xp("Check","xpamount") VALUES ((SELECT max(id) FROM Checks), 250);
+--SELECT * FROM xp WHERE "Check" = (SELECT max(id) FROM Checks);

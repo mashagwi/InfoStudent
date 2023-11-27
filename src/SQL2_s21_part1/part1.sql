@@ -1,4 +1,4 @@
-CREATE DATABASE S21_Info;
+--CREATE DATABASE S21_Info;
 
 CREATE TABLE IF NOT EXISTS  Peers(
     Nickname VARCHAR NOT NULL PRIMARY KEY,
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS P2P(
     CONSTRAINT fk_p2p_checking_peer FOREIGN KEY (CheckingPeer) REFERENCES Peers(Nickname)
 ); 
 
-CREATE OR REPLACE FUNCTION fnc_trg_tasks_insert_update()
+CREATE OR REPLACE FUNCTION fnc_trg_tasks_before_insert_update()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.ParentTask IS NULL THEN
@@ -104,12 +104,12 @@ BEGIN
 END;
 $$ LANGUAGE PLPGSQL;
 
-CREATE TRIGGER trg_tasks_insert_update
+CREATE TRIGGER trg_tasks_before_insert_update
 BEFORE INSERT OR UPDATE ON Tasks
 FOR EACH ROW
-EXECUTE FUNCTION fnc_trg_tasks_insert_update();
+EXECUTE FUNCTION fnc_trg_tasks_before_insert_update();
 
-CREATE OR REPLACE FUNCTION fnc_p2p_insert_update()
+CREATE OR REPLACE FUNCTION fnc_p2p_before_insert_update()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW."State" = 'Start' THEN
@@ -133,7 +133,12 @@ BEGIN
 END;
 $$ LANGUAGE PLPGSQL;
 
-CREATE OR REPLACE FUNCTION fnc_verter_insert_update()
+CREATE TRIGGER trg_p2p_before_insert_update
+BEFORE INSERT OR UPDATE ON P2P
+FOR EACH ROW
+EXECUTE FUNCTION fnc_p2p_before_insert_update();
+
+CREATE OR REPLACE FUNCTION fnc_verter_before_insert_update()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW."State" = 'Start' THEN
@@ -143,7 +148,7 @@ BEGIN
         END IF;
     ELSE
         IF NEW."Time" <= (
-                SELECT "Time" FROM Verter WHERE NEW."Check" = P2P."Check"
+                SELECT "Time" FROM Verter WHERE NEW."Check" = Verter."Check"
                 ORDER BY "Time" DESC LIMIT 1
             )
             THEN RAISE EXCEPTION 'Проверка не может быть завершена раньше, чем она начнется';
@@ -157,15 +162,10 @@ BEGIN
 END;
 $$ LANGUAGE PLPGSQL;
 
-CREATE TRIGGER trg_p2p_insert_update
-BEFORE INSERT OR UPDATE ON P2P
-FOR EACH ROW
-EXECUTE FUNCTION fnc_p2p_insert_update();
-
-CREATE TRIGGER trg_verter_insert_update
+CREATE TRIGGER trg_verter_before_insert_update
 BEFORE INSERT OR UPDATE ON Verter
 FOR EACH ROW
-EXECUTE FUNCTION fnc_verter_insert_update();
+EXECUTE FUNCTION fnc_verter_before_insert_update();
 
 
 ------------ экспорт в CSV ---------------
