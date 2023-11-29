@@ -249,8 +249,9 @@ BEGIN
 END;
 $$ LANGUAGE PLPGSQL;
 
-SELECT * FROM early_coming_peers('12:00:00', 3);
+-- SELECT * FROM early_coming_peers('12:00:00', 3);
 -- 16 TASK
+
 -- 17 TASK
 CREATE OR REPLACE FUNCTION calculate_early_entries_percentage()
 RETURNS TABLE (
