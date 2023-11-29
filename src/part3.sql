@@ -130,12 +130,17 @@ END;
 $$ LANGUAGE plpgsql;
 -- SELECT * FROM get_most_checked_task_per_day();
 
+
+
 -- 7 TASK
-CREATE OR REPLACE FUNCTION check_peers_who_finished_block(task_block VARCHAR)
-RETURNS TABLE (Peer VARCHAR, "Day" DATE ) AS $$
+DROP PROCEDURE IF EXISTS check_peers_who_finished_block(rc4 refcursor, branch varchar);
+
+CREATE
+OR REPLACE PROCEDURE check_peers_who_finished_block(rc refcursor, task_block varchar) AS
+$$
 BEGIN
-RETURN QUERY
-	WITH list_tasks_of_block AS (
+OPEN rc FOR 
+WITH list_tasks_of_block AS (
     	SELECT DISTINCT Task
     	FROM Checks
     	WHERE Task LIKE '%' || task_block || '%'
@@ -151,9 +156,13 @@ RETURN QUERY
 	HAVING COUNT(DISTINCT Task) = (SELECT COUNT(*) FROM list_tasks_of_block)
 	ORDER BY 1;
 END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
 
--- SELECT * FROM check_peers_who_finished_block('CPP');
+-- BEGIN;
+-- CALL check_peers_who_finished_block('ref', 'CPP');
+-- FETCH ALL IN "ref";
+-- END;
 
 
 -- 8 TASK
@@ -178,11 +187,41 @@ $$ LANGUAGE plpgsql;
 -- SELECT * FROM find_peer_recommendations();
 -- 9 TASK
 
+
 -- 10 TASK
+
 -- 11 TASK
+DROP PROCEDURE IF EXISTS pass CASCADE;
+CREATE
+OR REPLACE PROCEDURE pass(IN task1 varchar, IN task2 varchar, IN task3 varchar, IN r refcursor) AS $$
+BEGIN
+OPEN r FOR
+        WITH SuccessTasks AS (
+	SELECT peer,
+	task
+	FROM checks
+	JOIN p2p ON checks.id = p2p."Check"
+	LEFT JOIN verter ON checks.id = verter."Check"
+	WHERE p2p."State" = 'Success'
+	AND (NOT exists(SELECT * FROM verter WHERE verter."Check" = checks.id)
+		 OR
+		 verter."State" = 'Success')
+)
+SELECT DISTINCT peer as nickname
+FROM SuccessTasks
+WHERE peer in (SELECT peer FROM SuccessTasks WHERE task = task1)
+  AND peer in (SELECT peer FROM SuccessTasks WHERE task = task2)
+  AND peer NOT IN (SELECT peer FROM SuccessTasks WHERE task = task3);
+END;
+    $$LANGUAGE
+plpgsql;
+
+-- BEGIN;
+-- CALL pass('DO1', 'DO2' , 'A8', 'r');
+-- FETCH ALL IN "r";
+-- END;
 
 -- 12 TASK
-
 CREATE OR REPLACE FUNCTION get_preceding_tasks()
 RETURNS TABLE (
     Task VARCHAR,
@@ -213,7 +252,36 @@ $$ LANGUAGE plpgsql;
 -- SELECT * FROM get_preceding_tasks()
 
 -- 13 TASK
+CREATE
+OR REPLACE PROCEDURE successful_day(rc refcursor, succesful_streak integer) AS
+$$
+BEGIN
+OPEN rc FOR WITH temp AS (SELECT *
+                                 FROM checks
+                                          JOIN p2p p
+                                          ON checks.id = p."Check"
+                                          LEFT JOIN verter v
+                                          ON checks.id = v."Check"
+                                          JOIN tasks t
+                                          ON t.title = checks.task
+                                          JOIN xp x
+                                          ON checks.id = x."Check"
+                                WHERE p."State" = 'Success'
+                                  AND (v."State" = 'Success' OR v."State" IS NULL))
+SELECT date
+FROM temp
+WHERE temp.maxxp * 0.8 <= temp.xpamount
+GROUP BY temp.date
+HAVING COUNT(date) >= succesful_streak
+ORDER BY date;
+END;
+$$
+LANGUAGE plpgsql;
 
+BEGIN;
+CALL successful_day('ref', 2);
+FETCH ALL IN "ref";
+END;
 
 -- 14 TASK
 CREATE OR REPLACE FUNCTION find_peer_with_highest_xp()
@@ -233,23 +301,26 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
-
 -- SELECT * FROM find_peer_with_highest_xp();
+
 -- 15 TASK 
-CREATE OR REPLACE FUNCTION early_coming_peers(determinated_time TIME, N INTEGER)
-RETURNS TABLE (peer VARCHAR)
-AS $$
+DROP PROCEDURE IF EXISTS PeersInCampusEarlyEntries;
+CREATE OR REPLACE PROCEDURE PeersInCampusEarlyEntries(IN determinated_time time, IN N int, IN r refcursor) AS $$
 BEGIN
-	RETURN QUERY
-		SELECT t.peer 
+OPEN r FOR
+SELECT t.peer 
 		FROM TimeTracking AS t
 		WHERE t."Time" < determinated_time
 		GROUP BY t.peer
 		HAVING COUNT(*) >= N;
 END;
-$$ LANGUAGE PLPGSQL;
+    $$LANGUAGE
+plpgsql;
 
--- SELECT * FROM early_coming_peers('12:00:00', 3);
+-- BEGIN;
+-- CALL PeersInCampusEarlyEntries('12:00:00', 3, 'ref');
+-- FETCH ALL IN "ref";
+-- END;
 -- 16 TASK
 
 -- 17 TASK
