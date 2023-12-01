@@ -150,7 +150,6 @@ WITH list_tasks_of_block AS (
 END;
 $$
 LANGUAGE plpgsql;
-
 -- BEGIN;
 -- CALL check_peers_who_finished_block('ref', 'CPP');
 -- FETCH ALL IN "ref";
@@ -178,6 +177,35 @@ $$ LANGUAGE plpgsql;
 -- SELECT * FROM find_peer_recommendations();
 
 -- 9 TASK
+DROP PROCEDURE IF EXISTS BlocksStart CASCADE;
+CREATE OR REPLACE PROCEDURE BlocksStart(IN p_block1 text, IN p_block2 text, IN r refcursor) AS $$
+BEGIN
+    OPEN r FOR
+    WITH PeerBlocks AS (
+        SELECT DISTINCT p.Nickname, 
+                        CASE 
+                            WHEN EXISTS (SELECT 1 FROM Checks c WHERE c.Peer = p.Nickname AND c.Task LIKE CONCAT('%', p_block1, '%')) THEN 1
+                            ELSE 0
+                        END AS Block1,
+                        CASE 
+                            WHEN EXISTS (SELECT 1 FROM Checks c WHERE c.Peer = p.Nickname AND c.Task LIKE CONCAT('%', p_block2, '%')) THEN 1
+                            ELSE 0
+                        END AS Block2
+        FROM Peers p
+    )
+    SELECT 
+        ROUND((COUNT(Nickname) FILTER (WHERE Block1 = 1 AND Block2 = 0) * 100 / COUNT(Nickname)))::integer AS "StartedBlock1",
+        ROUND((COUNT(Nickname) FILTER (WHERE Block1 = 0 AND Block2 = 1) * 100 / COUNT(Nickname)))::integer AS "StartedBlock2",
+        ROUND((COUNT(Nickname) FILTER (WHERE Block1 = 1 AND Block2 = 1) * 100 / COUNT(Nickname)))::integer AS "StartedBothBlock",
+        ROUND((COUNT(Nickname) FILTER (WHERE Block1 = 0 AND Block2 = 0) * 100 / COUNT(Nickname)))::integer AS "DidntStartedAnyBlock"
+    FROM PeerBlocks;
+END;
+$$
+LANGUAGE plpgsql;
+-- BEGIN;
+-- CALL BlocksStart('C', 'DO', 'ref');
+-- FETCH ALL IN "ref";
+-- END;
 
 
 -- 10 TASK
