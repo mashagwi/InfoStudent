@@ -236,7 +236,7 @@ CREATE
 OR REPLACE PROCEDURE pass(IN task1 varchar, IN task2 varchar, IN task3 varchar, IN r refcursor) AS $$
 BEGIN
 OPEN r FOR
-        WITH SuccessTasks AS (
+    WITH SuccessTasks AS (
 	SELECT peer,
 	task
 	FROM checks
