@@ -16,11 +16,9 @@ BEGIN
 	GROUP BY CheckingPeer, CheckedPeer;
 END;
 $$ LANGUAGE plpgsql;
-
 -- SELECT * FROM fnc_tranferred_ponts();
 
 -- 2 TASK
-
 DROP FUNCTION IF EXISTS fnc_get_exp_amount();
 
 CREATE OR REPLACE FUNCTION fnc_get_exp_amount()
@@ -32,11 +30,9 @@ BEGIN
 		JOIN checks ON xp."Check" = checks.id);
 END;
 $$ LANGUAGE plpgsql;
-
 -- SELECT * FROM fnc_get_exp_amount();
 
 -- 3 TASK
-
 DROP FUNCTION IF EXISTS fnc_peers_who_not_out(day_date DATE);
 
 CREATE OR REPLACE FUNCTION fnc_peers_who_not_out(day_date DATE)
@@ -50,11 +46,9 @@ BEGIN
 		HAVING SUM(CAST(timetracking."State" AS INTEGER)) < 3);
 END;
 $$ LANGUAGE plpgsql;
-
 -- SELECT * FROM fnc_peers_who_not_out('2023-02-25');
 
 -- 4 TASK
-
 CREATE OR REPLACE FUNCTION calculate_peer_points_change()
 RETURNS TABLE (
     Peer VARCHAR,
@@ -77,7 +71,6 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
-
 -- SELECT * FROM calculate_peer_points_change();
 
 -- 5 TASK
@@ -100,7 +93,6 @@ BEGIN
 	ORDER BY 2 DESC;
 END;
 $$ LANGUAGE plpgsql;
-
 -- SELECT * FROM prp_calc_points_transfer_from_func();
 
 -- 6 TASK
@@ -183,8 +175,8 @@ BEGIN
         p.Nickname;
 END;
 $$ LANGUAGE plpgsql;
-
 -- SELECT * FROM find_peer_recommendations();
+
 -- 9 TASK
 
 
@@ -215,7 +207,6 @@ WHERE peer in (SELECT peer FROM SuccessTasks WHERE task = task1)
 END;
     $$LANGUAGE
 plpgsql;
-
 -- BEGIN;
 -- CALL pass('DO1', 'DO2' , 'A8', 'r');
 -- FETCH ALL IN "r";
@@ -277,11 +268,10 @@ ORDER BY date;
 END;
 $$
 LANGUAGE plpgsql;
-
-BEGIN;
-CALL successful_day('ref', 2);
-FETCH ALL IN "ref";
-END;
+-- BEGIN;
+-- CALL successful_day('ref', 2);
+-- FETCH ALL IN "ref";
+-- END;
 
 -- 14 TASK
 CREATE OR REPLACE FUNCTION find_peer_with_highest_xp()
@@ -316,12 +306,28 @@ SELECT t.peer
 END;
     $$LANGUAGE
 plpgsql;
-
 -- BEGIN;
 -- CALL PeersInCampusEarlyEntries('12:00:00', 3, 'ref');
 -- FETCH ALL IN "ref";
 -- END;
+
 -- 16 TASK
+DROP PROCEDURE IF EXISTS PeersOutCampus CASCADE;
+CREATE
+OR REPLACE PROCEDURE PeersOutCampus(IN N int, IN M int, IN r refcursor) AS $$
+BEGIN
+OPEN r FOR
+	SELECT peer
+	FROM timetracking
+	WHERE "Date" >= current_date - N AND "State" = '2'
+	GROUP BY peer, "Date"
+	HAVING COUNT("State") > M;
+END;
+$$LANGUAGE plpgsql;
+-- BEGIN;
+-- CALL PeersOutCampus(9, 1, 'r');
+-- FETCH ALL IN "r";
+-- END;
 
 -- 17 TASK
 CREATE OR REPLACE FUNCTION calculate_early_entries_percentage()
