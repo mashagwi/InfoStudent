@@ -181,6 +181,54 @@ $$ LANGUAGE plpgsql;
 
 
 -- 10 TASK
+CREATE OR REPLACE PROCEDURE checks_in_birthday(INOUT _result_one refcursor = 'rs')
+    LANGUAGE plpgsql AS
+$$
+BEGIN
+OPEN _result_one FOR 
+WITH peers_birthdays AS (
+	SELECT nickname, TO_CHAR(birthday, 'MM-DD') AS birthday
+	FROM peers
+), peers_failures AS (
+	SELECT c.peer, TO_CHAR(c.date, 'MM-DD') AS check_date, 'Failure' AS "State"
+	FROM Checks c
+	WHERE c.ID IN (
+    	SELECT DISTINCT c.ID
+    	FROM Checks c
+    	LEFT JOIN Verter v ON c.ID = v."Check" AND v."State" = 'Failure'
+    	LEFT JOIN P2P p ON c.ID = p."Check" AND p."State" = 'Failure'
+    	WHERE v.ID IS NOT NULL OR p.ID IS NOT NULL
+	)
+), peers_success AS (
+	SELECT c.peer, TO_CHAR(c.date, 'MM-DD') AS check_date, 'Success' AS "State"
+    FROM Checks c
+    WHERE c.ID IN (
+        SELECT DISTINCT c.ID
+        FROM Checks c
+        LEFT JOIN Verter v ON c.ID = v."Check" AND v."State" = 'Success'
+        JOIN P2P p ON c.ID = p."Check" AND p."State" = 'Success'
+        WHERE (v.ID IS NOT NULL OR p.ID IS NOT NULL)
+    )
+), all_checks_in_birthday AS (
+	SELECT pb.nickname, pb.birthday, ps."State"
+	FROM peers_birthdays pb
+	JOIN peers_success ps ON pb.nickname = ps.peer AND pb.birthday = ps.check_date
+	UNION ALL
+	SELECT pb.nickname, pb.birthday, pf."State"
+	FROM peers_birthdays pb
+	JOIN peers_failures pf ON pb.nickname = pf.peer AND pb.birthday = pf.check_date
+)
+SELECT
+    ROUND(COUNT(*) FILTER (WHERE "State" = 'Success') * 100.0 / COUNT(*)) AS SuccessfulChecks,
+    ROUND(COUNT(*) FILTER (WHERE "State" = 'Failure') * 100.0 / COUNT(*)) AS unSuccessfulChecks
+FROM all_checks_in_birthday;
+END
+$$;
+-- BEGIN;
+-- CALL checks_in_birthday();
+-- FETCH ALL FROM "rs";
+-- END;
+
 
 -- 11 TASK
 DROP PROCEDURE IF EXISTS pass CASCADE;
