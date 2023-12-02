@@ -142,7 +142,8 @@ END;
 $$ LANGUAGE plpgsql;
 -- SELECT * FROM get_most_checked_task_per_day();
 
--- 7 TASK
+-- SEVENTH TASK --
+-- Найти всех пиров, выполнивших весь заданный блок задач и дату завершения последнего задания --
 DROP PROCEDURE IF EXISTS check_peers_who_finished_block(rc4 refcursor, branch varchar);
 
 CREATE
@@ -175,6 +176,7 @@ LANGUAGE plpgsql;
 
 
 -- 8 TASK
+-- Определить, к какому пиру стоит идти на проверку каждому обучающемуся
 CREATE OR REPLACE FUNCTION find_peer_recommendations()
 RETURNS TABLE (
     Peer VARCHAR,
@@ -194,7 +196,11 @@ END;
 $$ LANGUAGE plpgsql;
 -- SELECT * FROM find_peer_recommendations();
 
--- 9 TASK
+-- 9 TASK  
+-- Определить процент пиров, которые: Приступили только к блоку 1
+-- Приступили только к блоку 2
+-- Приступили к обоим
+-- Не приступили ни к одному
 DROP PROCEDURE IF EXISTS BlocksStart CASCADE;
 CREATE OR REPLACE PROCEDURE BlocksStart(IN p_block1 text, IN p_block2 text, IN r refcursor) AS $$
 BEGIN
@@ -227,6 +233,7 @@ LANGUAGE plpgsql;
 
 
 -- 10 TASK
+-- Определить процент пиров, которые когда-либо успешно проходили проверку в свой день рождения
 CREATE OR REPLACE PROCEDURE checks_in_birthday(INOUT _result_one refcursor = 'rs')
     LANGUAGE plpgsql AS
 $$
@@ -277,6 +284,7 @@ $$;
 
 
 -- 11 TASK
+-- Определить всех пиров, которые сдали заданные задания 1 и 2, но не сдали задание 3
 DROP PROCEDURE IF EXISTS pass CASCADE;
 CREATE
 OR REPLACE PROCEDURE pass(IN task1 varchar, IN task2 varchar, IN task3 varchar, IN r refcursor) AS $$
@@ -307,6 +315,7 @@ plpgsql;
 -- END;
 
 -- 12 TASK
+-- Определить для каждой задачи кол-во предшествующих ей задач
 CREATE OR REPLACE FUNCTION get_preceding_tasks()
 RETURNS TABLE (
     Task VARCHAR,
@@ -337,6 +346,7 @@ $$ LANGUAGE plpgsql;
 -- SELECT * FROM get_preceding_tasks()
 
 -- 13 TASK
+-- Найти "удачные" для проверок дни. День считается "удачным", если в нем есть хотя бы N идущих подряд успешных проверки --
 CREATE
 OR REPLACE PROCEDURE successful_day(rc refcursor, succesful_streak integer) AS
 $$
@@ -368,6 +378,7 @@ LANGUAGE plpgsql;
 -- END;
 
 -- 14 TASK
+-- вывести пира с максимальным кол-вом xp
 CREATE OR REPLACE FUNCTION find_peer_with_highest_xp()
 RETURNS TABLE (
     Peer VARCHAR,
@@ -379,15 +390,18 @@ BEGIN
     FROM P2P
     JOIN Checks ON P2P."Check" = Checks.ID AND P2P."State" = 'Success'
     JOIN XP xp ON Checks.ID = xp."Check"
+    LEFT JOIN verter v ON checks.id = v."Check"
+    WHERE P2P."State" = 'Success' 
+    AND (v."State" = 'Success' OR v."State" IS NULL)
     GROUP BY P2P.checkingpeer
     ORDER BY TotalXP DESC
     LIMIT 1;
-
 END;
 $$ LANGUAGE plpgsql;
 -- SELECT * FROM find_peer_with_highest_xp();
 
 -- 15 TASK 
+-- Определить пиров, приходивших раньше заданного времени не менее N раз за всё время
 DROP PROCEDURE IF EXISTS PeersInCampusEarlyEntries;
 CREATE OR REPLACE PROCEDURE PeersInCampusEarlyEntries(IN determinated_time time, IN N int, IN r refcursor) AS $$
 BEGIN
@@ -406,6 +420,7 @@ plpgsql;
 -- END;
 
 -- 16 TASK
+-- Определить пиров, выходивших за последние N дней из кампуса больше M раз
 DROP PROCEDURE IF EXISTS PeersOutCampus CASCADE;
 CREATE
 OR REPLACE PROCEDURE PeersOutCampus(IN N int, IN M int, IN r refcursor) AS $$
@@ -418,12 +433,26 @@ OPEN r FOR
 	HAVING COUNT("State") > M;
 END;
 $$LANGUAGE plpgsql;
+
 -- BEGIN;
--- CALL PeersOutCampus(9, 1, 'r');
+-- CALL PeersOutCampus(2, 2, 'r');
+-- FETCH ALL IN "r";
+-- END;
+
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-12-01', '11:24:11', 1);
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-12-01', '23:42:00', 2);
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-12-01', '11:24:11', 1);
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-12-01', '23:42:00', 2);
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-12-01', '11:24:11', 1);
+insert into timetracking("peer","Date","Time","State") values('norridge', '2023-12-01', '23:42:00', 2);
+
+-- BEGIN;
+-- CALL PeersOutCampus(2, 2, 'r');
 -- FETCH ALL IN "r";
 -- END;
 
 -- 17 TASK
+-- Определить для каждого месяца процент ранних входов
 CREATE OR REPLACE FUNCTION calculate_early_entries_percentage()
 RETURNS TABLE (
     Month text,
