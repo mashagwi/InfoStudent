@@ -1,4 +1,5 @@
--- 1 TASK
+-- 1 TASK --
+-- Написать функцию, возвращающую таблицу TransferredPoints в более человекочитаемом виде --
 DROP FUNCTION IF EXISTS fnc_tranferred_ponts();
 
 CREATE OR REPLACE FUNCTION fnc_tranferred_ponts()
@@ -18,7 +19,8 @@ END;
 $$ LANGUAGE plpgsql;
 -- SELECT * FROM fnc_tranferred_ponts();
 
--- 2 TASK
+-- 2 TASK --
+-- Написать функцию, которая возвращает таблицу вида: ник пользователя, название проверенного задания, кол-во полученного XP --
 DROP FUNCTION IF EXISTS fnc_get_exp_amount();
 
 CREATE OR REPLACE FUNCTION fnc_get_exp_amount()
@@ -32,7 +34,8 @@ END;
 $$ LANGUAGE plpgsql;
 -- SELECT * FROM fnc_get_exp_amount();
 
--- 3 TASK
+-- 3 TASK --
+-- Написать функцию, определяющую пиров, которые не выходили из кампуса в течение всего дня --
 DROP FUNCTION IF EXISTS fnc_peers_who_not_out(day_date DATE);
 
 CREATE OR REPLACE FUNCTION fnc_peers_who_not_out(day_date DATE)
@@ -46,9 +49,18 @@ BEGIN
 		HAVING SUM(CAST(timetracking."State" AS INTEGER)) < 3);
 END;
 $$ LANGUAGE plpgsql;
--- SELECT * FROM fnc_peers_who_not_out('2023-02-25');
 
--- 4 TASK
+-- insert into timetracking("peer","Date","Time","State") values('mashagwi', '2023-03-09', '19:50:52', 1);
+-- insert into timetracking("peer","Date","Time","State") values('hildabur', '2023-03-09', '19:50:52', 1);
+-- insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-03-09', '19:50:52', 1);
+
+SELECT * FROM fnc_peers_who_not_out('2023-03-09');
+
+-- insert into timetracking("peer","Date","Time","State") values('lassandra', '2023-03-09', '19:58:52', 2);
+SELECT * FROM fnc_peers_who_not_out('2023-03-09');
+
+-- 4 TASK --
+-- Посчитать изменение в количестве пир поинтов каждого пира по таблице TransferredPoints --
 CREATE OR REPLACE FUNCTION calculate_peer_points_change()
 RETURNS TABLE (
     Peer VARCHAR,
@@ -71,9 +83,16 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
--- SELECT * FROM calculate_peer_points_change();
 
--- 5 TASK
+SELECT * FROM calculate_peer_points_change();
+
+-- insert into transferredpoints("checkingpeer","checkedpeer","pointsamount") values ('georgier', 'vulpixta', 10);
+-- insert into transferredpoints("checkingpeer","checkedpeer","pointsamount") values ('lassandra', 'vulpixta', 10);
+-- insert into transferredpoints("checkingpeer","checkedpeer","pointsamount") values ('mashagwi', 'hildabur', 100);
+SELECT * FROM calculate_peer_points_change();
+
+-- 5 TASK --
+-- Посчитать изменение в количестве пир поинтов каждого пира по таблице, возвращаемой первой функцией из Part 3 --
 CREATE OR REPLACE FUNCTION prp_calc_points_transfer_from_func()
 RETURNS TABLE(Peer VARCHAR, PointsChange NUMERIC) AS $$
 BEGIN
@@ -95,7 +114,8 @@ END;
 $$ LANGUAGE plpgsql;
 -- SELECT * FROM prp_calc_points_transfer_from_func();
 
--- 6 TASK
+-- 6 TASK --
+-- Определить самое часто проверяемое задание за каждый день --
 CREATE OR REPLACE FUNCTION get_most_checked_task_per_day()
 RETURNS TABLE (
     Date DATE,
@@ -121,8 +141,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 -- SELECT * FROM get_most_checked_task_per_day();
-
-
 
 -- 7 TASK
 DROP PROCEDURE IF EXISTS check_peers_who_finished_block(rc4 refcursor, branch varchar);
