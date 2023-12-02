@@ -699,3 +699,16 @@ insert into xp("Check","xpamount") values(51, 250);
 insert into xp("Check","xpamount") values(52, 1450);
 insert into xp("Check","xpamount") values(53, 400);
 insert into xp("Check","xpamount") values(54, 300);
+
+
+insert into verter values (1, 1,'Start', '11:02:03');
+insert into verter values (2, 1,'Success', '11:02:08');
+
+insert into verter values (3, 2,'Start', '11:03:03');
+insert into verter values (4, 2,'Success', '11:03:08');
+
+insert into verter values (5, 3,'Start', '11:05:03');
+insert into verter values (6, 3,'Success', '11:05:08');
+
+insert into verter values (7, 4,'Start', '11:06:03');
+insert into verter values (8, 4,'Success', '11:06:08');
